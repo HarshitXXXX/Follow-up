@@ -1,0 +1,7 @@
+{
+  "name": "Operations & Follow-up Hub",
+  "description": "Team tasks, program scheduling, meetings management, and birthday tracking dashboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+

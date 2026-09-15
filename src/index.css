@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #EEF1F4;
+  --panel: #FFFFFF;
+  --ink: #1B2430;
+  --ink-soft: #5B6472;
+  --ink-faint: #93A0AC;
+  --line: #DCE1E6;
+  --amber: #E8A33D;
+  --amber-bg: #FCF1DF;
+  --teal: #2F8F82;
+  --teal-bg: #E4F2F0;
+  --coral: #D6604D;
+  --coral-bg: #FBE7E3;
+  --indigo: #4C5FD5;
+  --indigo-bg: #E9EBFA;
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg);
+  color: var(--ink);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-fraunces {
+  font-family: 'Fraunces', Georgia, serif;
+}
+
+.font-mono-code {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+@keyframes gentlePulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(1.35);
+  }
+}
+
+.animate-gentle-pulse {
+  animation: gentlePulse 1.8s ease-in-out infinite;
+}
