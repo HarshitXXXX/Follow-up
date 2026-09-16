@@ -98,3 +98,12 @@ export interface Meeting {
   actionItems: MeetingActionItem[];
   createdAt: string;
 }
+
+export interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+  role?: string;
+  provider: 'email' | 'google';
+}

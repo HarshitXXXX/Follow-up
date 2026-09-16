@@ -10,6 +10,7 @@ import {
   ActiveTab,
   ProgramStatus,
   MeetingStatus,
+  AuthUser,
 } from './types';
 import {
   defaultTasks,
@@ -36,15 +37,47 @@ import { ProgramSection } from './components/ProgramSection';
 import { ProgramModal } from './components/ProgramModal';
 import { MeetingSection } from './components/MeetingSection';
 import { MeetingModal } from './components/MeetingModal';
+import { LoginPage } from './components/LoginPage';
+import { FirestoreRulesModal } from './components/FirestoreRulesModal';
 import { ClipboardList, PlusCircle } from 'lucide-react';
+import {
+  subscribeToTasks,
+  subscribeToPrograms,
+  subscribeToMeetings,
+  subscribeToBirthdays,
+  syncTaskToFirestore,
+  deleteTaskFromFirestore,
+  syncProgramToFirestore,
+  deleteProgramFromFirestore,
+  syncMeetingToFirestore,
+  deleteMeetingFromFirestore,
+  syncBirthdayToFirestore,
+  deleteBirthdayFromFirestore,
+  testFirestoreConnection,
+  syncAllDataToFirestore,
+} from './firestoreService';
 
 const TASKS_STORAGE_KEY = 'followup_tasks_v2';
 const BDAYS_STORAGE_KEY = 'followup_birthdays_v2';
 const PROGRAMS_STORAGE_KEY = 'followup_programs_v2';
 const MEETINGS_STORAGE_KEY = 'followup_meetings_v2';
 const DEMO_CLEARED_FLAG = 'followup_demo_cleared_v3';
+const AUTH_USER_KEY = 'followup_auth_user_v1';
 
 export default function App() {
+  // Authentication state
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(() => {
+    try {
+      const saved = localStorage.getItem(AUTH_USER_KEY);
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    } catch (e) {
+      console.error('Failed to parse auth user', e);
+    }
+    return null;
+  });
+
   // Navigation active tab
   const [activeTab, setActiveTab] = useState<ActiveTab>('tasks');
 
@@ -159,8 +192,11 @@ export default function App() {
 
   const [bdayModalOpen, setBdayModalOpen] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [rulesModalOpen, setRulesModalOpen] = useState(false);
   const [showSaveToast, setShowSaveToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('Saved successfully');
+  const [firestoreConnected, setFirestoreConnected] = useState(true);
+  const [isSyncingFirestore, setIsSyncingFirestore] = useState(false);
 
   // Save notification toast helper
   const triggerSaveToast = useCallback((msg = 'Saved successfully') => {
@@ -171,7 +207,7 @@ export default function App() {
     }, 1400);
   }, []);
 
-  // Sync to localStorage
+  // Sync to localStorage and Firestore
   useEffect(() => {
     try {
       localStorage.setItem(TASKS_STORAGE_KEY, JSON.stringify(tasks));
@@ -203,6 +239,61 @@ export default function App() {
       console.error('Error saving meetings to localStorage', e);
     }
   }, [meetings]);
+
+  // Firestore Real-Time Subscriptions
+  useEffect(() => {
+    const unsubTasks = subscribeToTasks((remoteTasks) => {
+      if (remoteTasks && remoteTasks.length > 0) {
+        setTasks(remoteTasks);
+      }
+    });
+
+    const unsubPrograms = subscribeToPrograms((remotePrograms) => {
+      if (remotePrograms && remotePrograms.length > 0) {
+        setPrograms(remotePrograms);
+      }
+    });
+
+    const unsubMeetings = subscribeToMeetings((remoteMeetings) => {
+      if (remoteMeetings && remoteMeetings.length > 0) {
+        setMeetings(remoteMeetings);
+      }
+    });
+
+    const unsubBirthdays = subscribeToBirthdays((remoteBirthdays) => {
+      if (remoteBirthdays && remoteBirthdays.length > 0) {
+        setBirthdays(remoteBirthdays);
+      }
+    });
+
+    return () => {
+      unsubTasks();
+      unsubPrograms();
+      unsubMeetings();
+      unsubBirthdays();
+    };
+  }, []);
+
+  // Check Firestore connection on startup
+  useEffect(() => {
+    testFirestoreConnection().then((res) => {
+      setFirestoreConnected(res.success);
+    });
+  }, []);
+
+  // Bulk Push to Firestore Cloud
+  const handleSyncToFirestore = async () => {
+    setIsSyncingFirestore(true);
+    triggerSaveToast('Syncing all records to Firestore...');
+    const result = await syncAllDataToFirestore(tasks, programs, meetings, birthdays);
+    setIsSyncingFirestore(false);
+    if (result.success) {
+      setFirestoreConnected(true);
+      triggerSaveToast(`Synced ${result.count} records to Firestore!`);
+    } else {
+      triggerSaveToast('Firestore sync completed locally');
+    }
+  };
 
   // Handle URL change detection for standalone mode
   useEffect(() => {
@@ -337,16 +428,19 @@ export default function App() {
     taskData: Omit<Task, 'id' | 'notes' | 'createdAt'> & { id?: string }
   ) => {
     if (taskData.id) {
+      let updatedTask: Task | undefined;
       setTasks((prev) =>
-        prev.map((t) =>
-          t.id === taskData.id
-            ? {
-                ...t,
-                ...taskData,
-              }
-            : t
-        )
+        prev.map((t) => {
+          if (t.id === taskData.id) {
+            updatedTask = { ...t, ...taskData };
+            return updatedTask;
+          }
+          return t;
+        })
       );
+      if (updatedTask) {
+        syncTaskToFirestore(updatedTask);
+      }
       triggerSaveToast('Task updated');
     } else {
       const newTask: Task = {
@@ -356,6 +450,7 @@ export default function App() {
         createdAt: todayStr(),
       };
       setTasks((prev) => [newTask, ...prev]);
+      syncTaskToFirestore(newTask);
       triggerSaveToast('New task added');
     }
   };
@@ -365,13 +460,21 @@ export default function App() {
     if (!taskToDelete) return;
     if (window.confirm(`Are you sure you want to delete task "${taskToDelete.title}"?`)) {
       setTasks((prev) => prev.filter((t) => t.id !== id));
+      deleteTaskFromFirestore(id);
       triggerSaveToast('Task deleted');
     }
   };
 
   const handleStatusChange = (id: string, newStatus: TaskStatus) => {
     setTasks((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, status: newStatus } : t))
+      prev.map((t) => {
+        if (t.id === id) {
+          const updated = { ...t, status: newStatus };
+          syncTaskToFirestore(updated);
+          return updated;
+        }
+        return t;
+      })
     );
     triggerSaveToast('Status updated');
   };
@@ -383,28 +486,34 @@ export default function App() {
       date: todayStr(),
     };
     setTasks((prev) =>
-      prev.map((t) =>
-        t.id === taskId
-          ? {
-              ...t,
-              notes: [...(t.notes || []), newNote],
-            }
-          : t
-      )
+      prev.map((t) => {
+        if (t.id === taskId) {
+          const updated = {
+            ...t,
+            notes: [...(t.notes || []), newNote],
+          };
+          syncTaskToFirestore(updated);
+          return updated;
+        }
+        return t;
+      })
     );
     triggerSaveToast('Follow-up note added');
   };
 
   const handleDeleteNote = (taskId: string, noteId: string) => {
     setTasks((prev) =>
-      prev.map((t) =>
-        t.id === taskId
-          ? {
-              ...t,
-              notes: (t.notes || []).filter((n) => n.id !== noteId),
-            }
-          : t
-      )
+      prev.map((t) => {
+        if (t.id === taskId) {
+          const updated = {
+            ...t,
+            notes: (t.notes || []).filter((n) => n.id !== noteId),
+          };
+          syncTaskToFirestore(updated);
+          return updated;
+        }
+        return t;
+      })
     );
     triggerSaveToast('Note deleted');
   };
@@ -416,6 +525,7 @@ export default function App() {
       id: uid('b_'),
     };
     setBirthdays((prev) => [...prev, newBday]);
+    syncBirthdayToFirestore(newBday);
     triggerSaveToast('Birthday record saved');
   };
 
@@ -424,6 +534,7 @@ export default function App() {
     if (!bday) return;
     if (window.confirm(`Are you sure you want to delete ${bday.name}'s birthday?`)) {
       setBirthdays((prev) => prev.filter((b) => b.id !== id));
+      deleteBirthdayFromFirestore(id);
       triggerSaveToast('Birthday record deleted');
     }
   };
@@ -433,16 +544,19 @@ export default function App() {
     programData: Omit<Program, 'id' | 'createdAt'> & { id?: string }
   ) => {
     if (programData.id) {
+      let updatedProgram: Program | undefined;
       setPrograms((prev) =>
-        prev.map((p) =>
-          p.id === programData.id
-            ? {
-                ...p,
-                ...programData,
-              }
-            : p
-        )
+        prev.map((p) => {
+          if (p.id === programData.id) {
+            updatedProgram = { ...p, ...programData };
+            return updatedProgram;
+          }
+          return p;
+        })
       );
+      if (updatedProgram) {
+        syncProgramToFirestore(updatedProgram);
+      }
       triggerSaveToast('Program schedule updated');
     } else {
       const newProgram: Program = {
@@ -451,6 +565,7 @@ export default function App() {
         createdAt: todayStr(),
       };
       setPrograms((prev) => [newProgram, ...prev]);
+      syncProgramToFirestore(newProgram);
       triggerSaveToast('Program scheduled successfully');
     }
   };
@@ -460,13 +575,21 @@ export default function App() {
     if (!p) return;
     if (window.confirm(`Are you sure you want to delete "${p.title}"?`)) {
       setPrograms((prev) => prev.filter((item) => item.id !== id));
+      deleteProgramFromFirestore(id);
       triggerSaveToast('Program removed');
     }
   };
 
   const handleUpdateProgramStatus = (id: string, status: ProgramStatus) => {
     setPrograms((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, status } : p))
+      prev.map((p) => {
+        if (p.id === id) {
+          const updated = { ...p, status };
+          syncProgramToFirestore(updated);
+          return updated;
+        }
+        return p;
+      })
     );
     triggerSaveToast(`Program status set to ${status}`);
   };
@@ -484,14 +607,17 @@ export default function App() {
       speaker,
     };
     setPrograms((prev) =>
-      prev.map((p) =>
-        p.id === programId
-          ? {
-              ...p,
-              agendaItems: [...(p.agendaItems || []), newItem],
-            }
-          : p
-      )
+      prev.map((p) => {
+        if (p.id === programId) {
+          const updated = {
+            ...p,
+            agendaItems: [...(p.agendaItems || []), newItem],
+          };
+          syncProgramToFirestore(updated);
+          return updated;
+        }
+        return p;
+      })
     );
     triggerSaveToast('Agenda slot added');
   };
@@ -501,16 +627,19 @@ export default function App() {
     meetingData: Omit<Meeting, 'id' | 'createdAt'> & { id?: string }
   ) => {
     if (meetingData.id) {
+      let updatedMeeting: Meeting | undefined;
       setMeetings((prev) =>
-        prev.map((m) =>
-          m.id === meetingData.id
-            ? {
-                ...m,
-                ...meetingData,
-              }
-            : m
-        )
+        prev.map((m) => {
+          if (m.id === meetingData.id) {
+            updatedMeeting = { ...m, ...meetingData };
+            return updatedMeeting;
+          }
+          return m;
+        })
       );
+      if (updatedMeeting) {
+        syncMeetingToFirestore(updatedMeeting);
+      }
       triggerSaveToast('Meeting details updated');
     } else {
       const newMeeting: Meeting = {
@@ -519,6 +648,7 @@ export default function App() {
         createdAt: todayStr(),
       };
       setMeetings((prev) => [newMeeting, ...prev]);
+      syncMeetingToFirestore(newMeeting);
       triggerSaveToast('Meeting scheduled successfully');
     }
   };
@@ -528,13 +658,21 @@ export default function App() {
     if (!m) return;
     if (window.confirm(`Are you sure you want to delete meeting "${m.title}"?`)) {
       setMeetings((prev) => prev.filter((item) => item.id !== id));
+      deleteMeetingFromFirestore(id);
       triggerSaveToast('Meeting deleted');
     }
   };
 
   const handleUpdateMeetingStatus = (id: string, status: MeetingStatus) => {
     setMeetings((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, status } : m))
+      prev.map((m) => {
+        if (m.id === id) {
+          const updated = { ...m, status };
+          syncMeetingToFirestore(updated);
+          return updated;
+        }
+        return m;
+      })
     );
     triggerSaveToast(`Meeting marked as ${status}`);
   };
@@ -543,12 +681,14 @@ export default function App() {
     setMeetings((prev) =>
       prev.map((m) => {
         if (m.id !== meetingId) return m;
-        return {
+        const updated = {
           ...m,
           actionItems: (m.actionItems || []).map((a) =>
             a.id === actionId ? { ...a, done: !a.done } : a
           ),
         };
+        syncMeetingToFirestore(updated);
+        return updated;
       })
     );
     triggerSaveToast('Action item updated');
@@ -566,28 +706,34 @@ export default function App() {
       done: false,
     };
     setMeetings((prev) =>
-      prev.map((m) =>
-        m.id === meetingId
-          ? {
-              ...m,
-              actionItems: [...(m.actionItems || []), newAction],
-            }
-          : m
-      )
+      prev.map((m) => {
+        if (m.id === meetingId) {
+          const updated = {
+            ...m,
+            actionItems: [...(m.actionItems || []), newAction],
+          };
+          syncMeetingToFirestore(updated);
+          return updated;
+        }
+        return m;
+      })
     );
     triggerSaveToast('Action item added');
   };
 
   const handleDeleteActionItem = (meetingId: string, actionId: string) => {
     setMeetings((prev) =>
-      prev.map((m) =>
-        m.id === meetingId
-          ? {
-              ...m,
-              actionItems: (m.actionItems || []).filter((a) => a.id !== actionId),
-            }
-          : m
-      )
+      prev.map((m) => {
+        if (m.id === meetingId) {
+          const updated = {
+            ...m,
+            actionItems: (m.actionItems || []).filter((a) => a.id !== actionId),
+          };
+          syncMeetingToFirestore(updated);
+          return updated;
+        }
+        return m;
+      })
     );
     triggerSaveToast('Action item removed');
   };
@@ -609,7 +755,7 @@ export default function App() {
     downloadAnchor.setAttribute('href', jsonString);
     downloadAnchor.setAttribute(
       'download',
-      `operations-hub-backup-${todayStr()}.json`
+      `follow-up-system-backup-${todayStr()}.json`
     );
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
@@ -668,6 +814,27 @@ export default function App() {
     triggerSaveToast('Sample template data loaded');
   };
 
+  // Authentication handlers
+  const handleLogin = (user: AuthUser) => {
+    setCurrentUser(user);
+    try {
+      localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
+    } catch (e) {
+      console.error('Failed to save auth user', e);
+    }
+    triggerSaveToast(`Welcome, ${user.name}`);
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    try {
+      localStorage.removeItem(AUTH_USER_KEY);
+    } catch (e) {
+      console.error('Failed to remove auth user', e);
+    }
+    triggerSaveToast('Logged out successfully');
+  };
+
   // If in standalone public birthday submission view
   if (isStandaloneMode) {
     return (
@@ -686,16 +853,35 @@ export default function App() {
     );
   }
 
+  // If not authenticated, render Login Page
+  if (!currentUser) {
+    return (
+      <>
+        <LoginPage
+          onLogin={handleLogin}
+          defaultEmail="harshitgaikwad2@gmail.com"
+        />
+        <SaveToast show={showSaveToast} message={toastMessage} />
+      </>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#EEF1F4] text-[#1B2430]">
       <main className="max-w-[1180px] mx-auto px-4 sm:px-6 pt-7 pb-24">
         {/* Navigation Header */}
         <Header
+          currentUser={currentUser}
+          onLogout={handleLogout}
           activeTab={activeTab}
           onTabChange={setActiveTab}
           taskCount={tasks.length}
           programCount={programs.length}
           meetingCount={meetings.length}
+          firebaseConnected={firestoreConnected}
+          onSyncToFirestore={handleSyncToFirestore}
+          isSyncingFirestore={isSyncingFirestore}
+          onOpenRulesModal={() => setRulesModalOpen(true)}
           onOpenTaskModal={() => {
             setEditingTask(null);
             setTaskModalOpen(true);
@@ -890,6 +1076,12 @@ export default function App() {
           window.history.pushState({}, '', url.toString());
           setIsStandaloneMode(true);
         }}
+      />
+
+      {/* Firestore Security Rules Modal */}
+      <FirestoreRulesModal
+        isOpen={rulesModalOpen}
+        onClose={() => setRulesModalOpen(false)}
       />
 
       {/* Floating Save Notification Toast */}

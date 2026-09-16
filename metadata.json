@@ -1,6 +1,6 @@
 {
-  "name": "Operations & Follow-up Hub",
-  "description": "Team tasks, program scheduling, meetings management, and birthday tracking dashboard.",
+  "name": "Follow Up System",
+  "description": "Follow Up System - Centralized team tasks, program schedules, meetings, and birthday management.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

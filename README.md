@@ -1,4 +1,4 @@
-# Operations & Follow-up Hub
+# Follow Up System
 
 A modern, responsive operations management and field follow-up platform built with React, TypeScript, and Tailwind CSS. The dashboard consolidates team tasks, community/village field assignments, program scheduling, meeting management with Minutes of Meeting (MoM), and team celebrations into a unified, high-efficiency workspace.
 

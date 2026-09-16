@@ -1,0 +1,46 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128;
+    }
+
+    // Connection Health Check & Diagnostics
+    match /_connection_test/{docId} {
+      allow read, write: if true;
+    }
+
+    // Workspace Sync Settings & Metadata
+    match /_settings/{docId} {
+      allow read, write: if true;
+    }
+
+    // Tasks Collection
+    match /tasks/{taskId} {
+      allow read, write: if isValidId(taskId);
+    }
+
+    // Programs Collection
+    match /programs/{programId} {
+      allow read, write: if isValidId(programId);
+    }
+
+    // Meetings Collection
+    match /meetings/{meetingId} {
+      allow read, write: if isValidId(meetingId);
+    }
+
+    // Birthdays Collection (Allows public standalone submission)
+    match /birthdays/{birthdayId} {
+      allow read, write: if isValidId(birthdayId);
+    }
+
+    // Global Safety Net: Deny access to any unlisted collection or path
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

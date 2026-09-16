@@ -1,0 +1,103 @@
+{
+  "entities": {
+    "Task": {
+      "title": "Task",
+      "description": "A field follow-up task item with status, village, priority, notes, and remarks.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 250 },
+        "name": { "type": "string", "maxLength": 150 },
+        "village": { "type": "string", "maxLength": 150 },
+        "priority": { "type": "string", "enum": ["high", "medium", "low"] },
+        "status": { "type": "string", "enum": ["pending", "progress", "done"] },
+        "desc": { "type": "string", "maxLength": 2000 },
+        "remark": { "type": "string", "maxLength": 1000 },
+        "assignee": { "type": "string", "maxLength": 150 },
+        "project": { "type": "string", "maxLength": 150 },
+        "due": { "type": "string", "maxLength": 30 },
+        "notes": { "type": "array" },
+        "createdAt": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "title", "priority", "status"]
+    },
+    "Program": {
+      "title": "Program",
+      "description": "Community program and event schedule with sessions and attendees.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 250 },
+        "category": { "type": "string", "maxLength": 100 },
+        "date": { "type": "string", "maxLength": 30 },
+        "startTime": { "type": "string", "maxLength": 20 },
+        "endTime": { "type": "string", "maxLength": 20 },
+        "venue": { "type": "string", "maxLength": 250 },
+        "coordinator": { "type": "string", "maxLength": 150 },
+        "targetAudience": { "type": "string", "maxLength": 200 },
+        "expectedCount": { "type": "number" },
+        "budget": { "type": "string", "maxLength": 50 },
+        "status": { "type": "string", "enum": ["scheduled", "completed", "cancelled"] },
+        "description": { "type": "string", "maxLength": 2000 },
+        "schedule": { "type": "array" },
+        "createdAt": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "title", "status"]
+    },
+    "Meeting": {
+      "title": "Meeting",
+      "description": "Team meetings with agenda, attendees, MoM and action items.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 250 },
+        "date": { "type": "string", "maxLength": 30 },
+        "time": { "type": "string", "maxLength": 20 },
+        "venue": { "type": "string", "maxLength": 250 },
+        "link": { "type": "string", "maxLength": 500 },
+        "organizer": { "type": "string", "maxLength": 150 },
+        "status": { "type": "string", "enum": ["scheduled", "completed", "cancelled"] },
+        "agenda": { "type": "string", "maxLength": 2000 },
+        "attendees": { "type": "array" },
+        "mom": { "type": "string", "maxLength": 5000 },
+        "actionItems": { "type": "array" },
+        "createdAt": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "title", "status"]
+    },
+    "Birthday": {
+      "title": "Birthday",
+      "description": "Team member and community birthday record.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 150 },
+        "date": { "type": "string", "maxLength": 30 },
+        "dept": { "type": "string", "maxLength": 100 },
+        "position": { "type": "string", "maxLength": 100 },
+        "village": { "type": "string", "maxLength": 150 },
+        "notes": { "type": "string", "maxLength": 1000 },
+        "createdAt": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["id", "name", "date"]
+    }
+  },
+  "firestore": {
+    "/tasks/{taskId}": {
+      "schema": "Task",
+      "description": "Tasks managed by the team"
+    },
+    "/programs/{programId}": {
+      "schema": "Program",
+      "description": "Scheduled events and programs"
+    },
+    "/meetings/{meetingId}": {
+      "schema": "Meeting",
+      "description": "Meetings and minutes"
+    },
+    "/birthdays/{birthdayId}": {
+      "schema": "Birthday",
+      "description": "Member birthdays for celebration reminders"
+    }
+  }
+}

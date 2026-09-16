@@ -11,15 +11,25 @@ import {
   CheckSquare,
   CalendarDays,
   Video,
+  LogOut,
+  User as UserIcon,
+  Cloud,
+  Shield,
 } from 'lucide-react';
-import { ActiveTab } from '../types';
+import { ActiveTab, AuthUser } from '../types';
 
 interface HeaderProps {
+  currentUser?: AuthUser | null;
+  onLogout?: () => void;
   activeTab: ActiveTab;
   onTabChange: (tab: ActiveTab) => void;
   taskCount: number;
   programCount: number;
   meetingCount: number;
+  firebaseConnected?: boolean;
+  onSyncToFirestore?: () => void;
+  isSyncingFirestore?: boolean;
+  onOpenRulesModal?: () => void;
   onOpenTaskModal: () => void;
   onOpenProgramModal: () => void;
   onOpenMeetingModal: () => void;
@@ -32,11 +42,17 @@ interface HeaderProps {
 }
 
 export const Header: React.FC<HeaderProps> = ({
+  currentUser,
+  onLogout,
   activeTab,
   onTabChange,
   taskCount,
   programCount,
   meetingCount,
+  firebaseConnected = true,
+  onSyncToFirestore,
+  isSyncingFirestore = false,
+  onOpenRulesModal,
   onOpenTaskModal,
   onOpenProgramModal,
   onOpenMeetingModal,
@@ -64,11 +80,24 @@ export const Header: React.FC<HeaderProps> = ({
         <div>
           <div className="flex items-center gap-2.5">
             <h1 className="font-fraunces text-3xl md:text-4xl font-semibold tracking-tight text-[#1B2430]">
-              Operations & Follow-up Hub
+              Follow Up System
             </h1>
             <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 text-xs font-semibold rounded-full bg-[#E9EBFA] text-[#4C5FD5]">
               <Sparkles className="w-3 h-3 mr-1" /> Pro Workspace
             </span>
+            <button
+              type="button"
+              onClick={onOpenRulesModal}
+              className={`inline-flex items-center px-2.5 py-0.5 text-xs font-medium rounded-full cursor-pointer transition-all hover:scale-105 ${
+                firebaseConnected
+                  ? 'bg-[#E4F2F0] text-[#2F8F82] hover:bg-[#d5ece9]'
+                  : 'bg-[#FCF1DF] text-[#E8A33D] hover:bg-[#fae7cb]'
+              }`}
+              title="Click to view & copy Firestore Security Rules (followup-55110)"
+            >
+              <Cloud className="w-3 h-3 mr-1" />
+              <span>Firebase Cloud</span>
+            </button>
           </div>
           <p className="text-sm text-[#5B6472] mt-1">
             Centralized team tasks, program schedules, meetings, and birthday records.
@@ -170,6 +199,31 @@ export const Header: React.FC<HeaderProps> = ({
                     <span>Import Data (Restore)</span>
                   </button>
                   <div className="h-px bg-[#DCE1E6] my-1" />
+                  {onSyncToFirestore && (
+                    <button
+                      onClick={() => {
+                        onSyncToFirestore();
+                        setShowToolsMenu(false);
+                      }}
+                      disabled={isSyncingFirestore}
+                      className="w-full px-3.5 py-2 text-left text-[#4C5FD5] hover:bg-[#E9EBFA] flex items-center gap-2 cursor-pointer font-medium disabled:opacity-50"
+                    >
+                      <Cloud className="w-4 h-4" />
+                      <span>{isSyncingFirestore ? 'Syncing to Firestore...' : 'Push All to Firestore'}</span>
+                    </button>
+                  )}
+                  {onOpenRulesModal && (
+                    <button
+                      onClick={() => {
+                        onOpenRulesModal();
+                        setShowToolsMenu(false);
+                      }}
+                      className="w-full px-3.5 py-2 text-left text-[#1B2430] hover:bg-[#F3F5F7] flex items-center gap-2 cursor-pointer font-medium"
+                    >
+                      <Shield className="w-4 h-4 text-[#4C5FD5]" />
+                      <span>Firestore Security Rules</span>
+                    </button>
+                  )}
                   <button
                     onClick={() => {
                       if (window.confirm('Are you sure you want to clear all data? This will reset all tasks, programs, meetings, and birthdays.')) {
@@ -205,6 +259,51 @@ export const Header: React.FC<HeaderProps> = ({
               onChange={handleFileChange}
             />
           </div>
+
+          {/* User Profile & Sign Out */}
+          {currentUser && (
+            <div className="flex items-center gap-2 pl-1.5 border-l border-[#DCE1E6]">
+              <div
+                className="flex items-center gap-2 bg-white border border-[#DCE1E6] px-2.5 py-1.5 rounded-xl shadow-2xs"
+                title={`${currentUser.name} (${currentUser.email}) - ${currentUser.role || 'Member'}`}
+              >
+                {currentUser.avatar ? (
+                  <img
+                    src={currentUser.avatar}
+                    alt={currentUser.name}
+                    referrerPolicy="no-referrer"
+                    className="w-6 h-6 rounded-full object-cover border border-[#DCE1E6]"
+                  />
+                ) : (
+                  <div className="w-6 h-6 rounded-full bg-[#E9EBFA] text-[#4C5FD5] flex items-center justify-center text-xs font-bold">
+                    {currentUser.name.charAt(0)}
+                  </div>
+                )}
+                <div className="hidden lg:block text-left text-xs leading-tight">
+                  <div className="font-semibold text-[#1B2430] truncate max-w-[110px]">
+                    {currentUser.name}
+                  </div>
+                  <div className="text-[10px] text-[#5B6472] capitalize flex items-center gap-1">
+                    <span>{currentUser.provider === 'google' ? 'Google' : 'Email'}</span>
+                    <span>•</span>
+                    <span className="truncate max-w-[70px]">{currentUser.role || 'Member'}</span>
+                  </div>
+                </div>
+              </div>
+
+              {onLogout && (
+                <button
+                  id="btn-header-logout"
+                  onClick={onLogout}
+                  title="Sign out of Follow Up System"
+                  className="bg-white hover:bg-[#FBE7E3] text-[#5B6472] hover:text-[#D6604D] border border-[#DCE1E6] hover:border-[#D6604D]/30 px-2.5 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Sign Out</span>
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
