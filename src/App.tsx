@@ -70,7 +70,11 @@ export default function App() {
     try {
       const saved = localStorage.getItem(AUTH_USER_KEY);
       if (saved) {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (parsed && parsed.avatar) {
+          delete parsed.avatar;
+        }
+        return parsed;
       }
     } catch (e) {
       console.error('Failed to parse auth user', e);

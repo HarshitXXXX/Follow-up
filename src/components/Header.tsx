@@ -2,17 +2,11 @@ import React, { useState } from 'react';
 import {
   Plus,
   Cake,
-  Share2,
-  Download,
-  Upload,
-  RotateCcw,
-  Trash2,
   CheckSquare,
   CalendarDays,
   Video,
   LogOut,
-  Cloud,
-  Shield,
+  User,
 } from 'lucide-react';
 import { ActiveTab, AuthUser } from '../types';
 
@@ -32,11 +26,11 @@ interface HeaderProps {
   onOpenProgramModal: () => void;
   onOpenMeetingModal: () => void;
   onOpenBdayModal: () => void;
-  onOpenShareModal: () => void;
-  onExportData: () => void;
-  onImportData: (file: File) => void;
-  onClearAllData: () => void;
-  onResetData: () => void;
+  onOpenShareModal?: () => void;
+  onExportData?: () => void;
+  onImportData?: (file: File) => void;
+  onClearAllData?: () => void;
+  onResetData?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -47,29 +41,12 @@ export const Header: React.FC<HeaderProps> = ({
   taskCount,
   programCount,
   meetingCount,
-  firebaseConnected = true,
-  onSyncToFirestore,
-  isSyncingFirestore = false,
-  onOpenRulesModal,
   onOpenTaskModal,
   onOpenProgramModal,
   onOpenMeetingModal,
   onOpenBdayModal,
-  onOpenShareModal,
-  onExportData,
-  onImportData,
-  onClearAllData,
-  onResetData,
 }) => {
-  const [showToolsMenu, setShowToolsMenu] = useState(false);
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      onImportData(e.target.files[0]);
-      e.target.value = '';
-    }
-  };
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   return (
     <header className="mb-6 pb-4 border-b border-[#DCE1E6]/80 flex flex-col lg:flex-row lg:items-center justify-between gap-3.5 sm:gap-4">
@@ -160,16 +137,6 @@ export const Header: React.FC<HeaderProps> = ({
               <Cake className="w-4 h-4 text-[#E8A33D]" />
               <span className="hidden sm:inline">Add Birthday</span>
             </button>
-
-            <button
-              id="btn-share-link"
-              onClick={onOpenShareModal}
-              title="Share Birthday Entry Link"
-              className="bg-white hover:bg-[#E9EBFA] text-[#4C5FD5] border border-[#DCE1E6] px-2.5 sm:px-3 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium flex items-center gap-1.5 transition-all cursor-pointer"
-            >
-              <Share2 className="w-4 h-4" />
-              <span className="hidden sm:inline">Share Link</span>
-            </button>
           </>
         )}
 
@@ -195,148 +162,62 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
         )}
 
-        {/* Tools & Backup Dropdown */}
-        <div className="relative">
-          <button
-            id="btn-data-tools"
-            onClick={() => setShowToolsMenu(!showToolsMenu)}
-            className="bg-white hover:bg-[#F3F5F7] text-[#5B6472] border border-[#DCE1E6] px-2.5 sm:px-3 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm transition-all cursor-pointer flex items-center gap-1.5 font-medium"
-            title="Data tools, backup options & Firestore"
-          >
-            <Download className="w-4 h-4" />
-            <span className="hidden sm:inline">Backup & Tools</span>
-          </button>
-
-          {showToolsMenu && (
-            <>
-              <div
-                className="fixed inset-0 z-20"
-                onClick={() => setShowToolsMenu(false)}
-              />
-              <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-lg border border-[#DCE1E6] py-1.5 z-30 text-xs sm:text-sm">
-                <button
-                  onClick={() => {
-                    onExportData();
-                    setShowToolsMenu(false);
-                  }}
-                  className="w-full px-3.5 py-2 text-left text-[#1B2430] hover:bg-[#F3F5F7] flex items-center gap-2 cursor-pointer"
-                >
-                  <Download className="w-4 h-4 text-[#4C5FD5]" />
-                  <span>Export Data (JSON)</span>
-                </button>
-                <button
-                  onClick={() => {
-                    fileInputRef.current?.click();
-                    setShowToolsMenu(false);
-                  }}
-                  className="w-full px-3.5 py-2 text-left text-[#1B2430] hover:bg-[#F3F5F7] flex items-center gap-2 cursor-pointer"
-                >
-                  <Upload className="w-4 h-4 text-[#2F8F82]" />
-                  <span>Import Data (Restore)</span>
-                </button>
-                <div className="h-px bg-[#DCE1E6] my-1" />
-                {onSyncToFirestore && (
-                  <button
-                    onClick={() => {
-                      onSyncToFirestore();
-                      setShowToolsMenu(false);
-                    }}
-                    disabled={isSyncingFirestore}
-                    className="w-full px-3.5 py-2 text-left text-[#4C5FD5] hover:bg-[#E9EBFA] flex items-center gap-2 cursor-pointer font-medium disabled:opacity-50"
-                  >
-                    <Cloud className="w-4 h-4" />
-                    <span>{isSyncingFirestore ? 'Syncing to Firestore...' : 'Push All to Firestore'}</span>
-                  </button>
-                )}
-                {onOpenRulesModal && (
-                  <button
-                    onClick={() => {
-                      onOpenRulesModal();
-                      setShowToolsMenu(false);
-                    }}
-                    className="w-full px-3.5 py-2 text-left text-[#1B2430] hover:bg-[#F3F5F7] flex items-center gap-2 cursor-pointer font-medium"
-                  >
-                    <Shield className="w-4 h-4 text-[#4C5FD5]" />
-                    <span>Firestore Security Rules</span>
-                  </button>
-                )}
-                <button
-                  onClick={() => {
-                    if (window.confirm('Are you sure you want to clear all data? This will reset all tasks, programs, meetings, and birthdays.')) {
-                      onClearAllData();
-                    }
-                    setShowToolsMenu(false);
-                  }}
-                  className="w-full px-3.5 py-2 text-left text-[#D6604D] hover:bg-[#FBE7E3] flex items-center gap-2 cursor-pointer font-medium"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  <span>Clear All Data</span>
-                </button>
-                <button
-                  onClick={() => {
-                    if (window.confirm('Load sample demo data? This will populate tasks, programs, and meetings for testing.')) {
-                      onResetData();
-                    }
-                    setShowToolsMenu(false);
-                  }}
-                  className="w-full px-3.5 py-2 text-left text-[#5B6472] hover:bg-[#F3F5F7] flex items-center gap-2 cursor-pointer"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                  <span>Load Sample Demo Data</span>
-                </button>
-              </div>
-            </>
-          )}
-          <input
-            type="file"
-            ref={fileInputRef}
-            className="hidden"
-            accept=".json"
-            onChange={handleFileChange}
-          />
-        </div>
-
-        {/* User Profile & Sign Out */}
+        {/* Compact Circular Profile Button (matching user icon) */}
         {currentUser && (
-          <div className="flex items-center gap-2 pl-1 sm:pl-1.5 border-l border-[#DCE1E6]">
-            <div
-              className="flex items-center gap-2 bg-white border border-[#DCE1E6] px-2 sm:px-2.5 py-1.5 rounded-xl shadow-2xs"
-              title={`${currentUser.name} (${currentUser.email}) - ${currentUser.role || 'Member'}`}
+          <div className="relative pl-1 sm:pl-2 border-l border-[#DCE1E6]">
+            <button
+              id="btn-header-profile-avatar"
+              type="button"
+              onClick={() => setShowProfileMenu(!showProfileMenu)}
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#1A73E8] hover:bg-[#1557B0] text-white flex items-center justify-center transition-all cursor-pointer shadow-xs hover:ring-2 hover:ring-[#1A73E8]/30 overflow-hidden active:scale-95"
+              title={`${currentUser.name} (${currentUser.email})`}
             >
-              {currentUser.avatar ? (
-                <img
-                  src={currentUser.avatar}
-                  alt={currentUser.name}
-                  referrerPolicy="no-referrer"
-                  className="w-6 h-6 rounded-full object-cover border border-[#DCE1E6]"
-                />
-              ) : (
-                <div className="w-6 h-6 rounded-full bg-[#E9EBFA] text-[#4C5FD5] flex items-center justify-center text-xs font-bold">
-                  {currentUser.name.charAt(0)}
-                </div>
-              )}
-              <div className="hidden xl:block text-left text-xs leading-tight">
-                <div className="font-semibold text-[#1B2430] truncate max-w-[110px]">
-                  {currentUser.name}
-                </div>
-                <div className="text-[10px] text-[#5B6472] capitalize flex items-center gap-1">
-                  <span>{currentUser.provider === 'google' ? 'Google' : 'Email'}</span>
-                  <span>•</span>
-                  <span className="truncate max-w-[70px]">{currentUser.role || 'Member'}</span>
-                </div>
-              </div>
-            </div>
+              <User className="w-5 h-5 text-white" />
+            </button>
 
-            {onLogout && (
-              <button
-                id="btn-header-logout"
-                onClick={onLogout}
-                title="Sign out"
-                className="bg-white hover:bg-[#FBE7E3] text-[#5B6472] hover:text-[#D6604D] border border-[#DCE1E6] hover:border-[#D6604D]/30 px-2 sm:px-2.5 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Sign Out</span>
-              </button>
+            {/* Compact Profile & Sign Out Dropdown */}
+            {showProfileMenu && (
+              <>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setShowProfileMenu(false)}
+                />
+                <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-xl border border-[#DCE1E6] p-3 z-50 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="flex items-center gap-3 p-2 border-b border-[#DCE1E6]/80 pb-3 mb-2">
+                    <div className="w-10 h-10 rounded-full bg-[#1A73E8] text-white flex items-center justify-center shrink-0 overflow-hidden font-semibold">
+                      <User className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-[#1B2430] truncate">
+                        {currentUser.name}
+                      </p>
+                      <p className="text-xs text-[#5B6472] truncate">
+                        {currentUser.email}
+                      </p>
+                      {currentUser.role && (
+                        <span className="inline-block mt-1 text-[10px] uppercase tracking-wider font-semibold text-[#4C5FD5] bg-[#E9EBFA] px-1.5 py-0.5 rounded-md">
+                          {currentUser.role}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {onLogout && (
+                    <button
+                      id="btn-header-profile-logout"
+                      type="button"
+                      onClick={() => {
+                        setShowProfileMenu(false);
+                        onLogout();
+                      }}
+                      className="w-full flex items-center gap-2 px-3 py-2 text-xs sm:text-sm font-semibold text-[#D6604D] hover:bg-[#FBE7E3] rounded-xl transition-all cursor-pointer"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span>Sign Out</span>
+                    </button>
+                  )}
+                </div>
+              </>
             )}
           </div>
         )}

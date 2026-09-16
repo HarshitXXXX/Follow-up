@@ -72,7 +72,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, defaultEmail = ''
           email: fbUser.email || email.trim(),
           role: 'Team Member',
           provider: 'email',
-          avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(displayName)}&backgroundColor=4C5FD5&textColor=ffffff`,
         };
         onLogin(user);
       } else {
@@ -86,7 +85,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, defaultEmail = ''
           email: fbUser.email || email.trim(),
           role: 'Operations Lead',
           provider: 'email',
-          avatar: fbUser.photoURL || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(displayName)}&backgroundColor=4C5FD5&textColor=ffffff`,
         };
         onLogin(user);
       }
@@ -108,7 +106,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, defaultEmail = ''
           email: email.trim().toLowerCase(),
           role: isSignUp ? 'Team Member' : 'Operations Lead',
           provider: 'email',
-          avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(displayName)}&backgroundColor=4C5FD5&textColor=ffffff`,
         };
         onLogin(fallbackUser);
       }
@@ -132,7 +129,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, defaultEmail = ''
         email: fbUser.email || defaultEmail || 'user@gmail.com',
         role: 'Operations Administrator',
         provider: 'google',
-        avatar: fbUser.photoURL || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
       };
       onLogin(user);
     } catch (err: any) {
@@ -144,7 +140,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, defaultEmail = ''
         email: defaultEmail || 'harshitgaikwad2@gmail.com',
         role: 'Operations Administrator',
         provider: 'google',
-        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
       };
       onLogin(user);
     } finally {
