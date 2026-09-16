@@ -87,7 +87,6 @@ export const BirthdayModal: React.FC<BirthdayModalProps> = ({
                 setName(e.target.value);
                 if (error) setError('');
               }}
-              placeholder="e.g. Sarah Jenkins, David Miller..."
               autoFocus
               className="w-full px-3.5 py-2.5 rounded-xl border border-[#DCE1E6] bg-[#EEF1F4]/40 text-sm text-[#1B2430] focus:outline-none focus:bg-white focus:border-[#4C5FD5] focus:ring-2 focus:ring-[#4C5FD5]/15 transition-all"
             />
@@ -119,7 +118,6 @@ export const BirthdayModal: React.FC<BirthdayModalProps> = ({
                 type="text"
                 value={dept}
                 onChange={(e) => setDept(e.target.value)}
-                placeholder="e.g. Sales, Marketing"
                 className="w-full px-3.5 py-2.5 rounded-xl border border-[#DCE1E6] bg-[#EEF1F4]/40 text-sm text-[#1B2430] focus:outline-none focus:bg-white focus:border-[#4C5FD5] transition-all"
               />
             </div>
@@ -132,7 +130,6 @@ export const BirthdayModal: React.FC<BirthdayModalProps> = ({
                 type="text"
                 value={position}
                 onChange={(e) => setPosition(e.target.value)}
-                placeholder="e.g. Director, Manager"
                 className="w-full px-3.5 py-2.5 rounded-xl border border-[#DCE1E6] bg-[#EEF1F4]/40 text-sm text-[#1B2430] focus:outline-none focus:bg-white focus:border-[#4C5FD5] transition-all"
               />
             </div>
@@ -147,7 +144,6 @@ export const BirthdayModal: React.FC<BirthdayModalProps> = ({
               type="text"
               value={village}
               onChange={(e) => setVillage(e.target.value)}
-              placeholder="e.g. New York, Chicago, London"
               className="w-full px-3.5 py-2.5 rounded-xl border border-[#DCE1E6] bg-[#EEF1F4]/40 text-sm text-[#1B2430] focus:outline-none focus:bg-white focus:border-[#4C5FD5] transition-all"
             />
           </div>

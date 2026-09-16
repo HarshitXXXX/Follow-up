@@ -100,7 +100,6 @@ export const StandaloneBirthdayAdd: React.FC<StandaloneBirthdayAddProps> = ({
                 setName(e.target.value);
                 if (statusMsg) setStatusMsg(null);
               }}
-              placeholder="e.g. David Miller"
               required
               className="w-full px-3.5 py-2.5 rounded-xl border border-[#DCE1E6] bg-[#EEF1F4]/40 text-sm text-[#1B2430] focus:outline-none focus:bg-white focus:border-[#4C5FD5] focus:ring-2 focus:ring-[#4C5FD5]/15 transition-all"
             />
@@ -131,7 +130,6 @@ export const StandaloneBirthdayAdd: React.FC<StandaloneBirthdayAddProps> = ({
                 type="text"
                 value={dept}
                 onChange={(e) => setDept(e.target.value)}
-                placeholder="e.g. Operations"
                 className="w-full px-3 py-2 rounded-xl border border-[#DCE1E6] bg-[#EEF1F4]/40 text-sm text-[#1B2430] focus:outline-none focus:bg-white focus:border-[#4C5FD5] transition-all"
               />
             </div>
@@ -144,7 +142,6 @@ export const StandaloneBirthdayAdd: React.FC<StandaloneBirthdayAddProps> = ({
                 type="text"
                 value={position}
                 onChange={(e) => setPosition(e.target.value)}
-                placeholder="e.g. Lead"
                 className="w-full px-3 py-2 rounded-xl border border-[#DCE1E6] bg-[#EEF1F4]/40 text-sm text-[#1B2430] focus:outline-none focus:bg-white focus:border-[#4C5FD5] transition-all"
               />
             </div>
@@ -158,7 +155,6 @@ export const StandaloneBirthdayAdd: React.FC<StandaloneBirthdayAddProps> = ({
               type="text"
               value={village}
               onChange={(e) => setVillage(e.target.value)}
-              placeholder="e.g. Seattle, WA"
               className="w-full px-3.5 py-2.5 rounded-xl border border-[#DCE1E6] bg-[#EEF1F4]/40 text-sm text-[#1B2430] focus:outline-none focus:bg-white focus:border-[#4C5FD5] transition-all"
             />
           </div>

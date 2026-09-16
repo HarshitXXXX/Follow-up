@@ -51,10 +51,10 @@ export const MeetingModal: React.FC<MeetingModalProps> = ({
     } else {
       setTitle('');
       setDate(todayStr());
-      setTime('14:00');
-      setDuration('45 mins');
+      setTime('');
+      setDuration('');
       setType('online');
-      setPlatformOrVenue('Google Meet');
+      setPlatformOrVenue('');
       setMeetLink('');
       setChairperson('');
       setAttendees('');
@@ -99,7 +99,7 @@ export const MeetingModal: React.FC<MeetingModalProps> = ({
       return;
     }
     if (!platformOrVenue.trim()) {
-      setError('Please specify the platform (e.g. Google Meet) or physical venue.');
+      setError('Please specify the platform or physical venue.');
       return;
     }
 
@@ -107,13 +107,13 @@ export const MeetingModal: React.FC<MeetingModalProps> = ({
       id: initialMeeting?.id,
       title: title.trim(),
       date,
-      time: time.trim() || '11:00 AM',
+      time: time.trim() || '',
       duration: duration.trim() || undefined,
       type,
       platformOrVenue: platformOrVenue.trim(),
       meetLink: meetLink.trim() || undefined,
-      chairperson: chairperson.trim() || 'Unassigned',
-      attendees: attendees.trim() || 'Core Team',
+      chairperson: chairperson.trim() || '',
+      attendees: attendees.trim() || '',
       status,
       agenda: agenda.trim() || undefined,
       minutesOfMeeting: minutesOfMeeting.trim() || undefined,
@@ -164,7 +164,6 @@ export const MeetingModal: React.FC<MeetingModalProps> = ({
                 setTitle(e.target.value);
                 if (error) setError('');
               }}
-              placeholder="e.g. Weekly Executive Sync & Sprint Review"
               autoFocus
               className="w-full px-3.5 py-2.5 rounded-xl border border-[#DCE1E6] bg-[#EEF1F4]/40 text-sm text-[#1B2430] focus:outline-none focus:bg-white focus:border-[#4C5FD5] focus:ring-2 focus:ring-[#4C5FD5]/15 transition-all"
             />
@@ -193,7 +192,6 @@ export const MeetingModal: React.FC<MeetingModalProps> = ({
                   type="text"
                   value={time}
                   onChange={(e) => setTime(e.target.value)}
-                  placeholder="e.g. 02:00 PM"
                   className="w-full pl-8 pr-3 py-2 rounded-xl border border-[#DCE1E6] bg-[#EEF1F4]/40 text-sm text-[#1B2430] focus:outline-none focus:bg-white focus:border-[#4C5FD5] transition-all"
                 />
                 <Clock className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#93A0AC]" />
@@ -208,7 +206,6 @@ export const MeetingModal: React.FC<MeetingModalProps> = ({
                 type="text"
                 value={duration}
                 onChange={(e) => setDuration(e.target.value)}
-                placeholder="e.g. 30 mins, 1 hour"
                 className="w-full px-3 py-2 rounded-xl border border-[#DCE1E6] bg-[#EEF1F4]/40 text-sm text-[#1B2430] focus:outline-none focus:bg-white focus:border-[#4C5FD5] transition-all"
               />
             </div>
@@ -240,7 +237,6 @@ export const MeetingModal: React.FC<MeetingModalProps> = ({
                   type="text"
                   value={platformOrVenue}
                   onChange={(e) => setPlatformOrVenue(e.target.value)}
-                  placeholder="e.g. Google Meet, Zoom, Boardroom 4"
                   className="w-full pl-8 pr-3 py-2 rounded-xl border border-[#DCE1E6] bg-[#EEF1F4]/40 text-sm text-[#1B2430] focus:outline-none focus:bg-white focus:border-[#4C5FD5] transition-all"
                 />
                 <MapPin className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#93A0AC]" />
@@ -258,7 +254,6 @@ export const MeetingModal: React.FC<MeetingModalProps> = ({
                 type="text"
                 value={meetLink}
                 onChange={(e) => setMeetLink(e.target.value)}
-                placeholder="https://meet.google.com/abc-defg-hij"
                 className="w-full pl-8 pr-3 py-2 rounded-xl border border-[#DCE1E6] bg-[#EEF1F4]/40 text-sm text-[#1B2430] focus:outline-none focus:bg-white focus:border-[#4C5FD5] transition-all"
               />
               <LinkIcon className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#93A0AC]" />
@@ -276,7 +271,6 @@ export const MeetingModal: React.FC<MeetingModalProps> = ({
                   type="text"
                   value={chairperson}
                   onChange={(e) => setChairperson(e.target.value)}
-                  placeholder="e.g. Emily Watson"
                   className="w-full pl-8 pr-3 py-2 rounded-xl border border-[#DCE1E6] bg-[#EEF1F4]/40 text-sm text-[#1B2430] focus:outline-none focus:bg-white focus:border-[#4C5FD5] transition-all"
                 />
                 <User className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#93A0AC]" />
@@ -292,7 +286,6 @@ export const MeetingModal: React.FC<MeetingModalProps> = ({
                   type="text"
                   value={attendees}
                   onChange={(e) => setAttendees(e.target.value)}
-                  placeholder="e.g. Design Team, QA Leads, Product Manager"
                   className="w-full pl-8 pr-3 py-2 rounded-xl border border-[#DCE1E6] bg-[#EEF1F4]/40 text-sm text-[#1B2430] focus:outline-none focus:bg-white focus:border-[#4C5FD5] transition-all"
                 />
                 <Users className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#93A0AC]" />
@@ -331,7 +324,6 @@ export const MeetingModal: React.FC<MeetingModalProps> = ({
             <textarea
               value={agenda}
               onChange={(e) => setAgenda(e.target.value)}
-              placeholder="1. Review progress on Q3 goals&#10;2. Address staging server blocker&#10;3. Finalize next release timeline"
               rows={2}
               className="w-full px-3.5 py-2 rounded-xl border border-[#DCE1E6] bg-[#EEF1F4]/40 text-sm text-[#1B2430] focus:outline-none focus:bg-white focus:border-[#4C5FD5] focus:ring-2 focus:ring-[#4C5FD5]/15 transition-all resize-y"
             />
@@ -345,7 +337,6 @@ export const MeetingModal: React.FC<MeetingModalProps> = ({
             <textarea
               value={minutesOfMeeting}
               onChange={(e) => setMinutesOfMeeting(e.target.value)}
-              placeholder="Record summary decisions, approvals, and outcomes agreed during the call..."
               rows={2}
               className="w-full px-3.5 py-2 rounded-xl border border-[#4C5FD5]/30 bg-[#E9EBFA]/30 text-sm text-[#1B2430] focus:outline-none focus:bg-white focus:border-[#4C5FD5] focus:ring-2 focus:ring-[#4C5FD5]/15 transition-all resize-y"
             />
@@ -394,14 +385,12 @@ export const MeetingModal: React.FC<MeetingModalProps> = ({
                 type="text"
                 value={newActionText}
                 onChange={(e) => setNewActionText(e.target.value)}
-                placeholder="Action item to follow-up on..."
                 className="flex-1 px-2.5 py-1.5 text-xs rounded-lg border border-[#DCE1E6] bg-white text-[#1B2430] focus:outline-none focus:border-[#4C5FD5]"
               />
               <input
                 type="text"
                 value={newActionAssignee}
                 onChange={(e) => setNewActionAssignee(e.target.value)}
-                placeholder="Assignee (opt)"
                 className="w-full sm:w-40 px-2.5 py-1.5 text-xs rounded-lg border border-[#DCE1E6] bg-white text-[#1B2430] focus:outline-none focus:border-[#4C5FD5]"
               />
               <button

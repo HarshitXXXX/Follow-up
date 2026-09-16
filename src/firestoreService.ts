@@ -34,13 +34,17 @@ export function subscribeToTasks(onUpdate: (tasks: Task[]) => void) {
   }
 }
 
+function cleanForFirestore<T>(data: T): T {
+  return JSON.parse(JSON.stringify(data));
+}
+
 /**
  * Save single task to Firestore
  */
 export async function syncTaskToFirestore(task: Task) {
   try {
     const docRef = doc(db, TASKS_COLL, task.id);
-    await setDoc(docRef, task, { merge: true });
+    await setDoc(docRef, cleanForFirestore(task), { merge: true });
   } catch (err) {
     console.warn('Failed to sync task to Firestore:', err);
   }

@@ -432,7 +432,11 @@ export default function App() {
       setTasks((prev) =>
         prev.map((t) => {
           if (t.id === taskData.id) {
-            updatedTask = { ...t, ...taskData };
+            updatedTask = {
+              ...t,
+              ...taskData,
+              attachments: taskData.attachments || [],
+            };
             return updatedTask;
           }
           return t;
@@ -447,6 +451,7 @@ export default function App() {
         ...taskData,
         id: uid('t_'),
         notes: [],
+        attachments: taskData.attachments || [],
         createdAt: todayStr(),
       };
       setTasks((prev) => [newTask, ...prev]);

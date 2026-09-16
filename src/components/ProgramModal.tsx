@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Calendar, Clock, MapPin, User, Users, DollarSign, AlertCircle, Plus, Trash2 } from 'lucide-react';
+import { X, Calendar, Clock, MapPin, User, AlertCircle, Plus, Trash2 } from 'lucide-react';
 import { Program, ProgramStatus, ProgramAgendaItem } from '../types';
 import { uid, todayStr } from '../utils/helpers';
 
@@ -35,11 +35,8 @@ export const ProgramModal: React.FC<ProgramModalProps> = ({
   const [endTime, setEndTime] = useState('17:00');
   const [venue, setVenue] = useState('');
   const [coordinator, setCoordinator] = useState('');
-  const [targetAudience, setTargetAudience] = useState('');
-  const [expectedAttendees, setExpectedAttendees] = useState<string>('');
   const [status, setStatus] = useState<ProgramStatus>('upcoming');
   const [description, setDescription] = useState('');
-  const [budget, setBudget] = useState('');
   const [agendaItems, setAgendaItems] = useState<ProgramAgendaItem[]>([]);
   const [newAgendaTime, setNewAgendaTime] = useState('');
   const [newAgendaTopic, setNewAgendaTopic] = useState('');
@@ -51,29 +48,23 @@ export const ProgramModal: React.FC<ProgramModalProps> = ({
       setTitle(initialProgram.title);
       setCategory(initialProgram.category || 'Workshop');
       setDate(initialProgram.date);
-      setStartTime(initialProgram.startTime || '09:30');
+      setStartTime(initialProgram.startTime || '');
       setEndTime(initialProgram.endTime || '');
       setVenue(initialProgram.venue);
       setCoordinator(initialProgram.coordinator);
-      setTargetAudience(initialProgram.targetAudience || '');
-      setExpectedAttendees(initialProgram.expectedAttendees ? String(initialProgram.expectedAttendees) : '');
       setStatus(initialProgram.status);
       setDescription(initialProgram.description || '');
-      setBudget(initialProgram.budget || '');
       setAgendaItems(initialProgram.agendaItems || []);
     } else {
       setTitle('');
       setCategory('Workshop');
       setDate(todayStr());
-      setStartTime('10:00');
-      setEndTime('16:00');
+      setStartTime('');
+      setEndTime('');
       setVenue('');
       setCoordinator('');
-      setTargetAudience('');
-      setExpectedAttendees('');
       setStatus('upcoming');
       setDescription('');
-      setBudget('');
       setAgendaItems([]);
     }
     setError('');
@@ -126,11 +117,8 @@ export const ProgramModal: React.FC<ProgramModalProps> = ({
       endTime: endTime.trim() || undefined,
       venue: venue.trim(),
       coordinator: coordinator.trim() || 'Unassigned',
-      targetAudience: targetAudience.trim() || undefined,
-      expectedAttendees: expectedAttendees ? parseInt(expectedAttendees, 10) || undefined : undefined,
       status,
       description: description.trim() || undefined,
-      budget: budget.trim() || undefined,
       agendaItems,
     });
 
@@ -166,7 +154,7 @@ export const ProgramModal: React.FC<ProgramModalProps> = ({
             </div>
           )}
 
-          {/* Title & Category */}
+          {/* Program Title & Category */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
             <div className="sm:col-span-2">
               <label className="block text-xs font-semibold text-[#1B2430] mb-1">
@@ -179,7 +167,6 @@ export const ProgramModal: React.FC<ProgramModalProps> = ({
                   setTitle(e.target.value);
                   if (error) setError('');
                 }}
-                placeholder="e.g. Annual Community Leadership Summit"
                 autoFocus
                 className="w-full px-3.5 py-2.5 rounded-xl border border-[#DCE1E6] bg-[#EEF1F4]/40 text-sm text-[#1B2430] focus:outline-none focus:bg-white focus:border-[#4C5FD5] focus:ring-2 focus:ring-[#4C5FD5]/15 transition-all"
               />
@@ -228,7 +215,6 @@ export const ProgramModal: React.FC<ProgramModalProps> = ({
                   type="text"
                   value={startTime}
                   onChange={(e) => setStartTime(e.target.value)}
-                  placeholder="e.g. 09:30 AM"
                   className="w-full pl-8 pr-3 py-2 rounded-xl border border-[#DCE1E6] bg-[#EEF1F4]/40 text-sm text-[#1B2430] focus:outline-none focus:bg-white focus:border-[#4C5FD5] transition-all"
                 />
                 <Clock className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#93A0AC]" />
@@ -244,7 +230,6 @@ export const ProgramModal: React.FC<ProgramModalProps> = ({
                   type="text"
                   value={endTime}
                   onChange={(e) => setEndTime(e.target.value)}
-                  placeholder="e.g. 04:30 PM"
                   className="w-full pl-8 pr-3 py-2 rounded-xl border border-[#DCE1E6] bg-[#EEF1F4]/40 text-sm text-[#1B2430] focus:outline-none focus:bg-white focus:border-[#4C5FD5] transition-all"
                 />
                 <Clock className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#93A0AC]" />
@@ -263,7 +248,6 @@ export const ProgramModal: React.FC<ProgramModalProps> = ({
                   type="text"
                   value={venue}
                   onChange={(e) => setVenue(e.target.value)}
-                  placeholder="e.g. Main Auditorium, City Convention Center"
                   className="w-full pl-8 pr-3 py-2 rounded-xl border border-[#DCE1E6] bg-[#EEF1F4]/40 text-sm text-[#1B2430] focus:outline-none focus:bg-white focus:border-[#4C5FD5] transition-all"
                 />
                 <MapPin className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#93A0AC]" />
@@ -279,59 +263,9 @@ export const ProgramModal: React.FC<ProgramModalProps> = ({
                   type="text"
                   value={coordinator}
                   onChange={(e) => setCoordinator(e.target.value)}
-                  placeholder="e.g. Sarah Jenkins"
                   className="w-full pl-8 pr-3 py-2 rounded-xl border border-[#DCE1E6] bg-[#EEF1F4]/40 text-sm text-[#1B2430] focus:outline-none focus:bg-white focus:border-[#4C5FD5] transition-all"
                 />
                 <User className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#93A0AC]" />
-              </div>
-            </div>
-          </div>
-
-          {/* Target Audience, Expected Attendees & Budget */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-            <div>
-              <label className="block text-xs font-semibold text-[#5B6472] mb-1">
-                Target Audience
-              </label>
-              <input
-                type="text"
-                value={targetAudience}
-                onChange={(e) => setTargetAudience(e.target.value)}
-                placeholder="e.g. College Students & Youth"
-                className="w-full px-3 py-2 rounded-xl border border-[#DCE1E6] bg-[#EEF1F4]/40 text-sm text-[#1B2430] focus:outline-none focus:bg-white focus:border-[#4C5FD5] transition-all"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-[#5B6472] mb-1">
-                Expected Attendees
-              </label>
-              <div className="relative">
-                <input
-                  type="number"
-                  min="1"
-                  value={expectedAttendees}
-                  onChange={(e) => setExpectedAttendees(e.target.value)}
-                  placeholder="e.g. 150"
-                  className="w-full pl-8 pr-3 py-2 rounded-xl border border-[#DCE1E6] bg-[#EEF1F4]/40 text-sm text-[#1B2430] focus:outline-none focus:bg-white focus:border-[#4C5FD5] transition-all"
-                />
-                <Users className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#93A0AC]" />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-[#5B6472] mb-1">
-                Budget / Estimated Cost
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={budget}
-                  onChange={(e) => setBudget(e.target.value)}
-                  placeholder="e.g. $2,500"
-                  className="w-full pl-8 pr-3 py-2 rounded-xl border border-[#DCE1E6] bg-[#EEF1F4]/40 text-sm text-[#1B2430] focus:outline-none focus:bg-white focus:border-[#4C5FD5] transition-all"
-                />
-                <DollarSign className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#93A0AC]" />
               </div>
             </div>
           </div>
@@ -367,7 +301,6 @@ export const ProgramModal: React.FC<ProgramModalProps> = ({
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Outline event goals, guest speaker briefs, registration prerequisites..."
               rows={2}
               className="w-full px-3.5 py-2 rounded-xl border border-[#DCE1E6] bg-[#EEF1F4]/40 text-sm text-[#1B2430] focus:outline-none focus:bg-white focus:border-[#4C5FD5] focus:ring-2 focus:ring-[#4C5FD5]/15 transition-all resize-y"
             />
@@ -420,7 +353,6 @@ export const ProgramModal: React.FC<ProgramModalProps> = ({
                   type="text"
                   value={newAgendaTime}
                   onChange={(e) => setNewAgendaTime(e.target.value)}
-                  placeholder="Time (e.g. 10:00 AM)"
                   className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-[#DCE1E6] bg-white text-[#1B2430] focus:outline-none focus:border-[#4C5FD5]"
                 />
               </div>
@@ -429,7 +361,6 @@ export const ProgramModal: React.FC<ProgramModalProps> = ({
                   type="text"
                   value={newAgendaTopic}
                   onChange={(e) => setNewAgendaTopic(e.target.value)}
-                  placeholder="Session / Topic title"
                   className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-[#DCE1E6] bg-white text-[#1B2430] focus:outline-none focus:border-[#4C5FD5]"
                 />
               </div>
@@ -438,7 +369,6 @@ export const ProgramModal: React.FC<ProgramModalProps> = ({
                   type="text"
                   value={newAgendaSpeaker}
                   onChange={(e) => setNewAgendaSpeaker(e.target.value)}
-                  placeholder="Speaker (opt)"
                   className="w-full px-2.5 py-1.5 text-xs rounded-lg border border-[#DCE1E6] bg-white text-[#1B2430] focus:outline-none focus:border-[#4C5FD5]"
                 />
               </div>

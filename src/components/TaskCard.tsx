@@ -14,9 +14,36 @@ import {
   AlertCircle,
   Copy,
   Check,
+  Paperclip,
+  Download,
+  FileText,
+  FileSpreadsheet,
+  FileImage,
+  FileArchive,
+  File,
 } from 'lucide-react';
-import { Task, TaskStatus, EffectiveStatus } from '../types';
-import { getEffectiveStatus, statusLabel } from '../utils/helpers';
+import { Task, TaskStatus, EffectiveStatus, TaskAttachment } from '../types';
+import { getEffectiveStatus, statusLabel, formatFileSize } from '../utils/helpers';
+
+const getAttachmentIcon = (fileName: string, mimeType?: string) => {
+  const ext = fileName.split('.').pop()?.toLowerCase() || '';
+  if (['pdf'].includes(ext) || mimeType?.includes('pdf')) {
+    return <FileText className="w-3.5 h-3.5 text-[#D6604D]" />;
+  }
+  if (['doc', 'docx', 'odt', 'rtf', 'txt', 'md'].includes(ext) || mimeType?.includes('word') || mimeType?.startsWith('text/')) {
+    return <FileText className="w-3.5 h-3.5 text-[#4C5FD5]" />;
+  }
+  if (['xls', 'xlsx', 'csv'].includes(ext) || mimeType?.includes('sheet') || mimeType?.includes('csv')) {
+    return <FileSpreadsheet className="w-3.5 h-3.5 text-[#2F8F82]" />;
+  }
+  if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'].includes(ext) || mimeType?.startsWith('image/')) {
+    return <FileImage className="w-3.5 h-3.5 text-[#E8A33D]" />;
+  }
+  if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) {
+    return <FileArchive className="w-3.5 h-3.5 text-[#7E69AB]" />;
+  }
+  return <File className="w-3.5 h-3.5 text-[#5B6472]" />;
+};
 
 interface TaskCardProps {
   task: Task;
@@ -82,11 +109,22 @@ export const TaskCard: React.FC<TaskCardProps> = ({
       `⚡ *Priority:* ${task.priority.toUpperCase()}`,
       `📊 *Status:* ${effectiveStatus.toUpperCase()}`,
       task.remark ? `💬 *Remark:* ${task.remark}` : null,
+      task.attachments && task.attachments.length > 0 ? `📎 *Attachments:* ${task.attachments.length} file(s)` : null,
     ].filter(Boolean);
 
     navigator.clipboard.writeText(lines.join('\n'));
     setCopied(true);
     setTimeout(() => setCopied(false), 1600);
+  };
+
+  const handleDownloadAttachment = (att: TaskAttachment) => {
+    if (!att.dataUrl) return;
+    const link = document.createElement('a');
+    link.href = att.dataUrl;
+    link.download = att.name;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -189,6 +227,13 @@ export const TaskCard: React.FC<TaskCardProps> = ({
                   <span className="inline-flex items-center gap-1 text-[#4C5FD5]">
                     <MessageSquare className="w-3 h-3" />
                     <span>{task.notes.length} notes</span>
+                  </span>
+                )}
+
+                {task.attachments && task.attachments.length > 0 && (
+                  <span className="inline-flex items-center gap-1 text-[#4C5FD5] bg-[#E9EBFA] px-2 py-0.5 rounded-md font-medium">
+                    <Paperclip className="w-3 h-3" />
+                    <span>{task.attachments.length} {task.attachments.length === 1 ? 'doc' : 'docs'}</span>
                   </span>
                 )}
               </div>
@@ -352,6 +397,55 @@ export const TaskCard: React.FC<TaskCardProps> = ({
               </div>
             </div>
 
+            {/* Attached Documents & Files */}
+            {task.attachments && task.attachments.length > 0 && (
+              <div className="bg-white p-3.5 rounded-xl border border-[#DCE1E6]">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[11px] uppercase tracking-wider font-semibold text-[#5B6472] flex items-center gap-1.5">
+                    <Paperclip className="w-3.5 h-3.5 text-[#4C5FD5]" />
+                    <span>Attached Documents & Files ({task.attachments.length})</span>
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {task.attachments.map((att) => (
+                    <div
+                      key={att.id}
+                      id={`task-card-attachment-${att.id}`}
+                      className="flex items-center justify-between p-2 rounded-lg bg-[#FAFBFC] border border-[#DCE1E6] hover:border-[#CBD5E1] transition-all"
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="p-1 rounded bg-white border border-[#DCE1E6] shrink-0">
+                          {getAttachmentIcon(att.name, att.type)}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs font-semibold text-[#1B2430] truncate max-w-[160px] sm:max-w-[200px]" title={att.name}>
+                            {att.name}
+                          </p>
+                          <p className="text-[10px] text-[#93A0AC]">
+                            {formatFileSize(att.size)}
+                          </p>
+                        </div>
+                      </div>
+                      {att.dataUrl && (
+                        <button
+                          id={`download-attachment-btn-${att.id}`}
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDownloadAttachment(att);
+                          }}
+                          className="p-1.5 text-[#5B6472] hover:text-[#4C5FD5] hover:bg-[#E9EBFA] rounded-md transition-colors cursor-pointer shrink-0 ml-1"
+                          title="Download document"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Follow-up Notes Section */}
             <div className="pt-2 border-t border-[#DCE1E6]/80">
               <div className="flex items-center justify-between mb-2.5">
@@ -401,7 +495,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
                   type="text"
                   value={noteInput}
                   onChange={(e) => setNoteInput(e.target.value)}
-                  placeholder="Add a follow-up note (e.g. called client, finalized invoice, waiting for approval...)"
+                  placeholder="Add a follow-up note..."
                   className="flex-1 px-3 py-2 rounded-xl border border-[#DCE1E6] bg-white text-xs text-[#1B2430] placeholder-[#93A0AC] focus:outline-none focus:border-[#4C5FD5] focus:ring-1 focus:ring-[#4C5FD5]"
                 />
                 <button

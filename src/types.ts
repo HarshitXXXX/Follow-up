@@ -10,6 +10,15 @@ export interface TaskNote {
   date: string; // YYYY-MM-DD
 }
 
+export interface TaskAttachment {
+  id: string;
+  name: string;
+  size: number; // in bytes
+  type: string; // MIME type or extension
+  dataUrl?: string; // Base64 data string for downloading/viewing
+  uploadedAt: string;
+}
+
 export interface Task {
   id: string;
   name?: string; // Person / Client Name
@@ -23,6 +32,7 @@ export interface Task {
   priority: TaskPriority;
   status: TaskStatus;
   notes: TaskNote[];
+  attachments?: TaskAttachment[];
   createdAt: string;
 }
 

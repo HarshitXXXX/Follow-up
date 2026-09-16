@@ -4,8 +4,6 @@ import {
   Clock,
   MapPin,
   User,
-  Users,
-  DollarSign,
   Plus,
   Search,
   Check,
@@ -109,7 +107,6 @@ export const ProgramSection: React.FC<ProgramSectionProps> = ({
 ⏰ Time: ${p.startTime}${p.endTime ? ` - ${p.endTime}` : ''}
 📍 Venue: ${p.venue}
 👤 Lead Coordinator: ${p.coordinator}
-👥 Target Audience: ${p.targetAudience || 'General public / team'}
 📊 Status: ${p.status.toUpperCase()}${p.description ? `\n📝 Overview: ${p.description}` : ''}${agendaText}`;
 
     navigator.clipboard.writeText(text);
@@ -371,20 +368,6 @@ export const ProgramSection: React.FC<ProgramSectionProps> = ({
                           <User className="w-3.5 h-3.5 text-[#2F8F82]" />
                           <span>Lead: {p.coordinator}</span>
                         </span>
-
-                        {p.expectedAttendees && (
-                          <span className="inline-flex items-center gap-1">
-                            <Users className="w-3.5 h-3.5 text-[#5B6472]" />
-                            <span>{p.expectedAttendees} Expected</span>
-                          </span>
-                        )}
-
-                        {p.budget && (
-                          <span className="inline-flex items-center gap-1 font-mono-code text-[#2F8F82] font-semibold">
-                            <DollarSign className="w-3.5 h-3.5" />
-                            <span>{p.budget}</span>
-                          </span>
-                        )}
                       </div>
                     </div>
 
@@ -515,7 +498,7 @@ export const ProgramSection: React.FC<ProgramSectionProps> = ({
                           type="text"
                           value={inlineTime}
                           onChange={(e) => setInlineTime(e.target.value)}
-                          placeholder="Time (e.g. 11:15 AM)"
+                          placeholder="Time"
                           className="w-full sm:w-36 px-2.5 py-1.5 text-xs rounded-lg border border-[#DCE1E6] bg-white text-[#1B2430] focus:outline-none focus:border-[#4C5FD5]"
                         />
                         <input

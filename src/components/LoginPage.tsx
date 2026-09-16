@@ -265,8 +265,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, defaultEmail = ''
                     required={isSignUp}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="e.g. Alex Morgan"
-                    className="w-full pl-9 pr-3 py-2 text-sm bg-white border border-[#DCE1E6] rounded-xl focus:outline-none focus:border-[#4C5FD5] focus:ring-2 focus:ring-[#4C5FD5]/20 text-[#1B2430] placeholder-[#93A0AC] transition-all"
+                    className="w-full pl-9 pr-3 py-2 text-sm bg-white border border-[#DCE1E6] rounded-xl focus:outline-none focus:border-[#4C5FD5] focus:ring-2 focus:ring-[#4C5FD5]/20 text-[#1B2430] transition-all"
                   />
                 </div>
               </div>
@@ -289,8 +288,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, defaultEmail = ''
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@company.com"
-                  className="w-full pl-9 pr-3 py-2 text-sm bg-white border border-[#DCE1E6] rounded-xl focus:outline-none focus:border-[#4C5FD5] focus:ring-2 focus:ring-[#4C5FD5]/20 text-[#1B2430] placeholder-[#93A0AC] transition-all"
+                  className="w-full pl-9 pr-3 py-2 text-sm bg-white border border-[#DCE1E6] rounded-xl focus:outline-none focus:border-[#4C5FD5] focus:ring-2 focus:ring-[#4C5FD5]/20 text-[#1B2430] transition-all"
                 />
               </div>
             </div>
